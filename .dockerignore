@@ -1,13 +1,12 @@
 .dockerignore
-
+.gitignore
+.git/
+.idea/
 .DS_Store
+.github/
+.gradle/
 
-**/node_modules
-.gradle
-**/.gradle
-!**/build.gradle
-!**/settings.gradle
-
-.idea
-
-# **/build/*
+gradle/
+build/
+out/
+styleguide/
