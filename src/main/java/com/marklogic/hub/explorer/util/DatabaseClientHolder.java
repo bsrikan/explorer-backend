@@ -22,6 +22,7 @@ public class DatabaseClientHolder {
 
   private DatabaseClient databaseClient;
   private DatabaseClient dataServiceClient;
+  private DatabaseClient jobDbClient;
 
   public DatabaseClient getDatabaseClient() {
     return databaseClient;
@@ -37,6 +38,14 @@ public class DatabaseClientHolder {
 
   public void setDataServiceClient(DatabaseClient dataServiceClient) {
     this.dataServiceClient = dataServiceClient;
+  }
+
+  public DatabaseClient getJobDbClient() {
+    return jobDbClient;
+  }
+
+  public void setJobDbClient(DatabaseClient jobDbClient) {
+    this.jobDbClient = jobDbClient;
   }
 
   @PreDestroy

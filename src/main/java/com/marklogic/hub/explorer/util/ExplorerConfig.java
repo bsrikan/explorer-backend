@@ -30,6 +30,10 @@ public class ExplorerConfig {
 
   @Value("${mlHost}")
   private String hostname;
+  @Value("${mlIsHostLoadBalancer}")
+  private Boolean isHostLoadBalancer;
+
+  // Final database properties
   @Value("${mlFinalDbName:#{null}}")
   private String finalDbName;
   @Value("${mlFinalPort}")
@@ -49,8 +53,27 @@ public class ExplorerConfig {
   private String finalCertPassword;
   @Value("${mlFinalExternalName:#{null}}")
   private String finalExternalName;
-  @Value("${mlIsHostLoadBalancer}")
-  private Boolean isHostLoadBalancer;
+
+  // Job database properties
+  @Value("${mlJobDbName:#{null}}")
+  private String jobDbName;
+  @Value("${mlJobPort}")
+  private Integer jobPort;
+  @Value("${mlJobAuth}")
+  private String jobAuthMethod;
+  @Value("${mlJobScheme}")
+  private String jobScheme;
+  @Value("${mlJobSimpleSsl}")
+  private Boolean jobSimpleSsl;
+  private SSLContext jobSslContext;
+  private DatabaseClientFactory.SSLHostnameVerifier jobSslHostnameVerifier;
+  private X509TrustManager jobTrustManager;
+  @Value("${mlJobCertFile:#{null}}")
+  private String jobCertFile;
+  @Value("${mlJobCertPassword:#{null}}")
+  private String jobCertPassword;
+  @Value("${mlJobExternalName:#{null}}")
+  private String jobExternalName;
 
   public String getHostname() {
     return hostname;
@@ -58,6 +81,14 @@ public class ExplorerConfig {
 
   public void setHostname(String hostname) {
     this.hostname = hostname;
+  }
+
+  public Boolean getHostLoadBalancer() {
+    return isHostLoadBalancer;
+  }
+
+  public void setHostLoadBalancer(Boolean hostLoadBalancer) {
+    isHostLoadBalancer = hostLoadBalancer;
   }
 
   public String getFinalDbName() {
@@ -149,12 +180,93 @@ public class ExplorerConfig {
     this.finalTrustManager = finalTrustManager;
   }
 
-  public Boolean getHostLoadBalancer() {
-    return isHostLoadBalancer;
+  public String getJobDbName() {
+    return jobDbName;
   }
 
-  public void setHostLoadBalancer(Boolean hostLoadBalancer) {
-    isHostLoadBalancer = hostLoadBalancer;
+  public void setJobDbName(String jobDbName) {
+    this.jobDbName = jobDbName;
+  }
+
+  public Integer getJobPort() {
+    return jobPort;
+  }
+
+  public void setJobPort(Integer jobPort) {
+    this.jobPort = jobPort;
+  }
+
+  public String getJobAuthMethod() {
+    return jobAuthMethod;
+  }
+
+  public void setJobAuthMethod(String jobAuthMethod) {
+    this.jobAuthMethod = jobAuthMethod;
+  }
+
+  public String getJobScheme() {
+    return jobScheme;
+  }
+
+  public void setJobScheme(String jobScheme) {
+    this.jobScheme = jobScheme;
+  }
+
+  public Boolean getJobSimpleSsl() {
+    return jobSimpleSsl;
+  }
+
+  public void setJobSimpleSsl(Boolean jobSimpleSsl) {
+    this.jobSimpleSsl = jobSimpleSsl;
+  }
+
+  public SSLContext getJobSslContext() {
+    return jobSslContext;
+  }
+
+  public void setJobSslContext(SSLContext jobSslContext) {
+    this.jobSslContext = jobSslContext;
+  }
+
+  public DatabaseClientFactory.SSLHostnameVerifier getJobSslHostnameVerifier() {
+    return jobSslHostnameVerifier;
+  }
+
+  public void setJobSslHostnameVerifier(
+      DatabaseClientFactory.SSLHostnameVerifier jobSslHostnameVerifier) {
+    this.jobSslHostnameVerifier = jobSslHostnameVerifier;
+  }
+
+  public X509TrustManager getJobTrustManager() {
+    return jobTrustManager;
+  }
+
+  public void setJobTrustManager(X509TrustManager jobTrustManager) {
+    this.jobTrustManager = jobTrustManager;
+  }
+
+  public String getJobCertFile() {
+    return jobCertFile;
+  }
+
+  public void setJobCertFile(String jobCertFile) {
+    this.jobCertFile = jobCertFile;
+  }
+
+  public String getJobCertPassword() {
+    return jobCertPassword;
+  }
+
+  public void setJobCertPassword(String jobCertPassword) {
+    this.jobCertPassword = jobCertPassword;
+  }
+
+  public String getJobExternalName() {
+    return jobExternalName;
+  }
+
+  public void setJobExternalName(String jobExternalName) {
+    this.jobExternalName = jobExternalName;
   }
 
   public Properties getQueryProperties() {
@@ -167,6 +279,12 @@ public class ExplorerConfig {
       finalSslContext = SimpleX509TrustManager.newSSLContext();
       finalSslHostnameVerifier = DatabaseClientFactory.SSLHostnameVerifier.ANY;
       finalTrustManager = new SimpleX509TrustManager();
+    }
+
+    if (BooleanUtils.isTrue(jobSimpleSsl)) {
+      jobSslContext = SimpleX509TrustManager.newSSLContext();
+      jobSslHostnameVerifier = DatabaseClientFactory.SSLHostnameVerifier.ANY;
+      jobTrustManager = new SimpleX509TrustManager();
     }
   }
 

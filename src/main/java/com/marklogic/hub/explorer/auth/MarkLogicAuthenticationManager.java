@@ -31,13 +31,12 @@ import org.springframework.stereotype.Component;
 public class MarkLogicAuthenticationManager implements AuthenticationProvider,
     AuthenticationManager {
 
+  private static final Logger logger = LoggerFactory
+      .getLogger(MarkLogicAuthenticationManager.class);
   @Autowired
   DatabaseClientHolder databaseClientHolder;
-
   @Autowired
   ExplorerConfig explorerConfig;
-
-  private static final Logger logger = LoggerFactory.getLogger(MarkLogicAuthenticationManager.class);
 
   public MarkLogicAuthenticationManager() {
   }
@@ -97,6 +96,12 @@ public class MarkLogicAuthenticationManager implements AuthenticationProvider,
         new DefaultConfiguredDatabaseClientFactory().newDatabaseClient(dataServiceClientConfig);
     databaseClientHolder.setDataServiceClient(dataServiceClient);
 
+    // Creating jobs database client
+    DatabaseClientConfig jobDbClientConfig = getJobDbClientConfig(username, password);
+    DatabaseClient jobDbClient = new DefaultConfiguredDatabaseClientFactory()
+        .newDatabaseClient(jobDbClientConfig);
+    databaseClientHolder.setJobDbClient(jobDbClient);
+
     return new ConnectionAuthenticationToken(token.getPrincipal(), token.getCredentials(),
         token.getAuthorities());
   }
@@ -113,6 +118,24 @@ public class MarkLogicAuthenticationManager implements AuthenticationProvider,
     clientConfig.setCertPassword(explorerConfig.getFinalCertPassword());
     clientConfig.setExternalName(explorerConfig.getFinalExternalName());
     clientConfig.setTrustManager(explorerConfig.getFinalTrustManager());
+    if (explorerConfig.getHostLoadBalancer()) {
+      clientConfig.setConnectionType(DatabaseClient.ConnectionType.GATEWAY);
+    }
+    return clientConfig;
+  }
+
+  private DatabaseClientConfig getJobDbClientConfig(String username, String password) {
+    DatabaseClientConfig clientConfig = new DatabaseClientConfig(explorerConfig.getHostname(),
+        explorerConfig.getJobPort(), username, password);
+    clientConfig.setDatabase(explorerConfig.getJobDbName());
+    clientConfig.setSecurityContextType(SecurityContextType.valueOf(
+        explorerConfig.getJobAuthMethod().toUpperCase()));
+    clientConfig.setSslHostnameVerifier(explorerConfig.getJobSslHostnameVerifier());
+    clientConfig.setSslContext(explorerConfig.getJobSslContext());
+    clientConfig.setCertFile(explorerConfig.getJobCertFile());
+    clientConfig.setCertPassword(explorerConfig.getJobCertPassword());
+    clientConfig.setExternalName(explorerConfig.getJobExternalName());
+    clientConfig.setTrustManager(explorerConfig.getJobTrustManager());
     if (explorerConfig.getHostLoadBalancer()) {
       clientConfig.setConnectionType(DatabaseClient.ConnectionType.GATEWAY);
     }
