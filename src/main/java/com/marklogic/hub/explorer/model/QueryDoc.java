@@ -10,10 +10,8 @@ public class QueryDoc {
 
   public QueryDoc() {
     this.queryId = "";
-    this.queryName = "";
     this.queryDescription = "";
     this.docUpdateTime = "";
-    this.jsonQuery = new DocSearchQueryInfo();
   }
 
   public String getQueryId() {

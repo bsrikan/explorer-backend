@@ -7,7 +7,6 @@ public class QueryModel {
 
   public QueryModel() {
     this.docUri = "";
-    this.queryDoc = new QueryDoc();
   }
 
   public String getDocUri() {
