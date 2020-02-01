@@ -4,15 +4,11 @@
 package com.marklogic.hub.explorer.auth;
 
 import com.marklogic.client.DatabaseClient;
-import com.marklogic.client.ext.DatabaseClientConfig;
-import com.marklogic.client.ext.DefaultConfiguredDatabaseClientFactory;
-import com.marklogic.client.ext.SecurityContextType;
 import com.marklogic.hub.explorer.util.DatabaseClientHolder;
+import com.marklogic.hub.explorer.util.DbClientConfig;
 import com.marklogic.hub.explorer.util.ExplorerConfig;
 
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -31,12 +27,12 @@ import org.springframework.stereotype.Component;
 public class MarkLogicAuthenticationManager implements AuthenticationProvider,
     AuthenticationManager {
 
-  private static final Logger logger = LoggerFactory
-      .getLogger(MarkLogicAuthenticationManager.class);
   @Autowired
   DatabaseClientHolder databaseClientHolder;
   @Autowired
   ExplorerConfig explorerConfig;
+  @Autowired
+  DbClientConfig dbClientConfig;
 
   public MarkLogicAuthenticationManager() {
   }
@@ -63,9 +59,7 @@ public class MarkLogicAuthenticationManager implements AuthenticationProvider,
       throw new BadCredentialsException("Invalid credentials");
     }
 
-    DatabaseClientConfig clientConfig = getClientConfig(username, password);
-    DatabaseClient databaseClient =
-        new DefaultConfiguredDatabaseClientFactory().newDatabaseClient(clientConfig);
+    DatabaseClient databaseClient = dbClientConfig.createFinalDbClient(username, password);
 
     // Attempt connection
     DatabaseClient.ConnectionResult connectionResult;
@@ -90,56 +84,13 @@ public class MarkLogicAuthenticationManager implements AuthenticationProvider,
      * Creating and storing a DatabaseClient object w/o explicitly specifying the database name as
      * data services only works with the default database associated with the App Server.
      */
-    DatabaseClientConfig dataServiceClientConfig = getClientConfig(username, password);
-    dataServiceClientConfig.setDatabase(null);
-    DatabaseClient dataServiceClient =
-        new DefaultConfiguredDatabaseClientFactory().newDatabaseClient(dataServiceClientConfig);
-    databaseClientHolder.setDataServiceClient(dataServiceClient);
+    dbClientConfig.createFinalDbDataServiceClient(username, password);
 
     // Creating jobs database client
-    DatabaseClientConfig jobDbClientConfig = getJobDbClientConfig(username, password);
-    DatabaseClient jobDbClient = new DefaultConfiguredDatabaseClientFactory()
-        .newDatabaseClient(jobDbClientConfig);
-    databaseClientHolder.setJobDbClient(jobDbClient);
+    dbClientConfig.createJobsDbClient(username, password);
 
     return new ConnectionAuthenticationToken(token.getPrincipal(), token.getCredentials(),
         token.getAuthorities());
-  }
-
-  private DatabaseClientConfig getClientConfig(String username, String password) {
-    DatabaseClientConfig clientConfig = new DatabaseClientConfig(explorerConfig.getHostname(),
-        explorerConfig.getFinalPort(), username, password);
-    clientConfig.setDatabase(explorerConfig.getFinalDbName());
-    clientConfig.setSecurityContextType(SecurityContextType.valueOf(
-        explorerConfig.getFinalAuthMethod().toUpperCase()));
-    clientConfig.setSslHostnameVerifier(explorerConfig.getFinalSslHostnameVerifier());
-    clientConfig.setSslContext(explorerConfig.getFinalSslContext());
-    clientConfig.setCertFile(explorerConfig.getFinalCertFile());
-    clientConfig.setCertPassword(explorerConfig.getFinalCertPassword());
-    clientConfig.setExternalName(explorerConfig.getFinalExternalName());
-    clientConfig.setTrustManager(explorerConfig.getFinalTrustManager());
-    if (explorerConfig.getHostLoadBalancer()) {
-      clientConfig.setConnectionType(DatabaseClient.ConnectionType.GATEWAY);
-    }
-    return clientConfig;
-  }
-
-  private DatabaseClientConfig getJobDbClientConfig(String username, String password) {
-    DatabaseClientConfig clientConfig = new DatabaseClientConfig(explorerConfig.getHostname(),
-        explorerConfig.getJobPort(), username, password);
-    clientConfig.setDatabase(explorerConfig.getJobDbName());
-    clientConfig.setSecurityContextType(SecurityContextType.valueOf(
-        explorerConfig.getJobAuthMethod().toUpperCase()));
-    clientConfig.setSslHostnameVerifier(explorerConfig.getJobSslHostnameVerifier());
-    clientConfig.setSslContext(explorerConfig.getJobSslContext());
-    clientConfig.setCertFile(explorerConfig.getJobCertFile());
-    clientConfig.setCertPassword(explorerConfig.getJobCertPassword());
-    clientConfig.setExternalName(explorerConfig.getJobExternalName());
-    clientConfig.setTrustManager(explorerConfig.getJobTrustManager());
-    if (explorerConfig.getHostLoadBalancer()) {
-      clientConfig.setConnectionType(DatabaseClient.ConnectionType.GATEWAY);
-    }
-    return clientConfig;
   }
 }
 
