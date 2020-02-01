@@ -45,6 +45,11 @@ public class QueryDocController {
           "entityNames cannot be empty in the jsonQuery object");
     }
 
+    if (doc.getEntityProperties() == null || doc.getEntityProperties().isEmpty()) {
+      throw new ExplorerException(HttpStatus.BAD_REQUEST.value(),
+          "At least one entity property should be selected to display search results");
+    }
+
     queryDocService.saveQueryDoc(queryModel);
     if (docUri.isEmpty()) {
       return new ResponseEntity<>(queryModel.getDocUri(), HttpStatus.CREATED);

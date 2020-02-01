@@ -1,5 +1,7 @@
 package com.marklogic.hub.explorer.model;
 
+import java.util.List;
+
 public class QueryDoc {
 
   private String queryId;
@@ -7,6 +9,7 @@ public class QueryDoc {
   private String queryDescription;
   private String docUpdateTime;
   private DocSearchQueryInfo jsonQuery;
+  private List<String> entityProperties;
 
   public QueryDoc() {
     this.queryId = "";
@@ -52,5 +55,13 @@ public class QueryDoc {
 
   public void setJsonQuery(DocSearchQueryInfo jsonQuery) {
     this.jsonQuery = jsonQuery;
+  }
+
+  public List<String> getEntityProperties() {
+    return entityProperties;
+  }
+
+  public void setEntityProperties(List<String> entityProperties) {
+    this.entityProperties = entityProperties;
   }
 }
