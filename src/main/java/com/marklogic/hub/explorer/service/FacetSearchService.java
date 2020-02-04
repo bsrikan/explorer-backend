@@ -42,6 +42,9 @@ public class FacetSearchService {
     String sqlQuery = generateSqlQuery(fsQuery);
     if (sqlQuery != null) {
       JsonNode queryResults = executioner.executeSqlQuery(client, sqlQuery).get();
+      logger.debug(String.format("%s server response:", sqlQuery));
+      logger.debug(queryResults.asText());
+
       facetValues = parseFacetQueryResults(queryResults, fsQuery);
     }
     return facetValues;
@@ -66,12 +69,18 @@ public class FacetSearchService {
 
     if (sqlQuery != null) {
       queryResults = executioner.executeSqlQuery(client, sqlQuery).get();
+
+      logger.debug(String.format("%s server response:", sqlQuery));
+      logger.debug(queryResults.asText());
     }
 
     if (queryResults != null) {
       queryResults = queryResults.path("rows").get(0);
       facetValues.put("min", queryResults.get(minFacet).get("value").asText());
       facetValues.put("max", queryResults.get(maxFacet).get("value").asText());
+
+      logger.debug(String.format("%s: %s"), minFacet, facetValues.get("min"));
+      logger.debug(String.format("%s: %s"), minFacet, facetValues.get("max"));
     }
     return facetValues;
   }
@@ -104,10 +113,12 @@ public class FacetSearchService {
     String facetName =
         fsq.getFacetInfo().getSchemaName() + DOT_CHAR + fsq.getFacetInfo().getEntityName()
             + DOT_CHAR + fsq.getFacetInfo().getFacetName();
+    logger.debug(String.format("%s parsed facetValues:", fsq.getFacetInfo().getFacetName()));
     if (queryResults != null) {
       queryResults.path("rows").forEach(jsonNode -> {
         String value = jsonNode.get(facetName).get("value").asText();
         values.add(value);
+        logger.debug(value);
       });
     }
     return values;

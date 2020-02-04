@@ -27,22 +27,18 @@ public class QueryDocController {
     String docUri = queryModel.getDocUri();
     QueryDoc doc = queryModel.getQueryDoc();
 
-    if (doc == null) {
-      throw new ExplorerException(HttpStatus.BAD_REQUEST.value(), "queryDoc object cannot be null");
-    }
-
-    if (doc.getQueryName() == null || doc.getQueryName().isEmpty()) {
+    if (doc == null || doc.getQueryName() == null || doc.getQueryName().isEmpty()) {
       throw new ExplorerException(HttpStatus.BAD_REQUEST.value(), "Query Name cannot be empty");
     }
 
     if (doc.getJsonQuery() == null) {
-      throw new ExplorerException(HttpStatus.BAD_REQUEST.value(), "Query cannot be null");
+      throw new ExplorerException(HttpStatus.BAD_REQUEST.value(), "Search Query cannot be null");
     }
 
-    if (doc.getJsonQuery().getEntityNames() == null || doc.getJsonQuery().getEntityNames()
-        .isEmpty()) {
-      throw new ExplorerException(HttpStatus.BAD_REQUEST.value(),
-          "entityNames cannot be empty in the jsonQuery object");
+    if (doc.getJsonQuery() == null || doc.getJsonQuery().getEntityNames() == null || doc
+        .getJsonQuery().getEntityNames().isEmpty()) {
+      throw new ExplorerException(HttpStatus.BAD_REQUEST.value(), "Select atleast one entity."
+          + "Empty search query cannot be saved");
     }
 
     if (doc.getEntityProperties() == null || doc.getEntityProperties().isEmpty()) {

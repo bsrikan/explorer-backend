@@ -9,8 +9,10 @@ import java.util.List;
 import java.util.UUID;
 
 import com.marklogic.client.DatabaseClient;
+import com.marklogic.client.MarkLogicServerException;
 import com.marklogic.client.document.GenericDocumentManager;
 import com.marklogic.client.io.DocumentMetadataHandle;
+import com.marklogic.hub.explorer.exception.ExplorerException;
 import com.marklogic.hub.explorer.model.QueryDoc;
 import com.marklogic.hub.explorer.model.QueryModel;
 import com.marklogic.hub.explorer.util.DatabaseClientHolder;
@@ -75,7 +77,12 @@ public class QueryDocService {
     JsonNode queryDocNode = mapper.valueToTree(currDoc);
 
     // Writing the document into database in Json format
-    docMgr.writeAs(queryModel.getDocUri(), metadataHandle, queryDocNode);
+    try {
+      docMgr.writeAs(queryModel.getDocUri(), metadataHandle, queryDocNode);
+    } catch (MarkLogicServerException mlE) {
+      throw new ExplorerException(mlE.getServerStatusCode(), mlE.getServerMessageCode(),
+          mlE.getServerMessage(), mlE);
+    }
   }
 
   private String generateDocUri() {
